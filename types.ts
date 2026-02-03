@@ -9,10 +9,14 @@ export interface Transaction {
   date: string;
 }
 
+// --- AQUI ESTÁ A MUDANÇA IMPORTANTE ---
+// Adicionamos 'spent' (gasto) para o Planejamento funcionar
 export interface Budget {
   category: string;
   limit: number;
+  spent: number;
 }
+// ---------------------------------------
 
 export type HealthStatus = 'POSITIVE' | 'NEUTRAL' | 'RISK';
 
