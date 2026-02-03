@@ -5,103 +5,29 @@ import { TransactionForm } from './components/TransactionForm';
 import { FinancialCharts } from './components/FinancialCharts';
 import { TransactionList } from './components/TransactionList';
 import { AIAnalyst } from './components/AIAnalyst';
-import { Transaction } from './types'; 
-import { LayoutDashboard, Receipt, PieChart, Plus, CheckCircle2, Target, Calculator } from 'lucide-react';
+// Importando os componentes que você JÁ TEM na pasta components
+import { BudgetManager } from './components/BudgetManager';
+import { SimulationPanel } from './components/SimulationPanel';
+import { Transaction, TransactionType, Budget } from './types';
+import { LayoutDashboard, Receipt, PieChart, Plus, CheckCircle2, Wallet } from 'lucide-react';
 import './index.css';
-
-// --- COMPONENTES INTERNOS (Para evitar erros de arquivo) ---
-
-interface Budget {
-  category: string;
-  limit: number;
-  spent: number;
-}
-
-const BudgetManager: React.FC<{ transactions: Transaction[], budgets: Budget[], onUpdateBudget: (b: Budget) => void }> = ({ transactions, budgets, onUpdateBudget }) => {
-  const categories = ['Alimentação', 'Moradia', 'Transporte', 'Lazer', 'Saúde', 'Educação'];
-  
-  const getSpent = (cat: string) => transactions
-    .filter(t => t.type === 'expense' && t.category === cat)
-    .reduce((acc, t) => acc + t.amount, 0);
-
-  return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-bold text-white flex items-center gap-2"><Target size={18} className="text-emerald-500"/> Orçamento Mensal</h3>
-      <div className="grid gap-3">
-        {categories.map(cat => {
-          const budget = budgets.find(b => b.category === cat)?.limit || 0;
-          const spent = getSpent(cat);
-          const percent = budget > 0 ? (spent / budget) * 100 : 0;
-          
-          return (
-            <div key={cat} className="bg-neutral-900/50 p-3 rounded-xl border border-neutral-800">
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-neutral-300">{cat}</span>
-                <span className="text-neutral-400">{spent.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})} / {budget.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</span>
-              </div>
-              <div className="h-2 bg-neutral-800 rounded-full overflow-hidden">
-                <div className={`h-full rounded-full ${percent > 100 ? 'bg-red-500' : 'bg-emerald-500'}`} style={{ width: `${Math.min(percent, 100)}%` }}></div>
-              </div>
-              <input 
-                type="number" 
-                placeholder="Definir meta..."
-                className="mt-2 w-full bg-neutral-950 text-xs text-white p-1.5 rounded border border-neutral-800 focus:border-emerald-500 outline-none"
-                onBlur={(e) => onUpdateBudget({ category: cat, limit: Number(e.target.value), spent: 0 })}
-              />
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-const SimulationPanel: React.FC<{ transactions: Transaction[] }> = ({ transactions }) => {
-  const [goal, setGoal] = useState(0);
-  
-  const income = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
-  const expense = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
-  const savings = income - expense;
-
-  const calculate = () => {
-    if (savings <= 0) return 0;
-    return Math.ceil(goal / savings);
-  };
-
-  return (
-    <div className="bg-neutral-900/50 p-4 rounded-xl border border-neutral-800 space-y-4">
-      <h3 className="text-lg font-bold text-white flex items-center gap-2"><Calculator size={18} className="text-blue-500"/> Simulador</h3>
-      <div className="space-y-3">
-        <div>
-            <label className="text-xs text-neutral-400">Objetivo (R$):</label>
-            <input type="number" value={goal} onChange={e => setGoal(Number(e.target.value))} className="w-full bg-neutral-950 text-white p-2 rounded-lg border border-neutral-800 outline-none focus:border-blue-500"/>
-        </div>
-        <div className="bg-blue-500/10 p-3 rounded-lg border border-blue-500/20 text-center">
-            <p className="text-xs text-blue-300 mb-1">Economia atual: {savings.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}/mês</p>
-            <p className="text-xl font-bold text-white">{calculate()} meses</p>
-            <p className="text-[10px] text-neutral-500">para chegar lá</p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// --- APP PRINCIPAL ---
 
 const App = () => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'transactions' | 'planning'>('dashboard');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
+  // Carrega Transações
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
     const saved = localStorage.getItem('finmindTransactions');
     if (saved) return JSON.parse(saved);
     return [
       {id: '1', description: 'Salário', amount: 2000, type: 'income', category: 'Renda', date: '2026-02-01'},
-      {id: '2', description: 'Almoço', amount: 45, type: 'expense', category: 'Comida', date: '2026-02-03'}
+      {id: '2', description: 'Almoço', amount: 45, type: 'expense', category: 'Alimentação', date: '2026-02-03'}
     ];
   });
 
+  // Carrega Orçamentos
   const [budgets, setBudgets] = useState<Budget[]>(() => {
     const saved = localStorage.getItem('finmind_budgets');
     return saved ? JSON.parse(saved) : [];
@@ -115,7 +41,7 @@ const App = () => {
     localStorage.setItem('finmind_budgets', JSON.stringify(budgets));
   }, [budgets]);
 
-  const addTransaction = (description: string, amount: number, type: 'income' | 'expense', category: string, date: string) => {
+  const addTransaction = (description: string, amount: number, type: TransactionType, category: string, date: string) => {
     const newTransaction: Transaction = { id: crypto.randomUUID(), description, amount, type, category, date };
     setTransactions((prev) => [newTransaction, ...prev]);
     setActiveTab('dashboard');
@@ -134,9 +60,9 @@ const App = () => {
     });
   };
 
-  // --- NOVAS FUNÇÕES (Limpar e Exportar) ---
+  // Funções de Limpeza e Exportação
   const clearAllTransactions = () => {
-    if (confirm('ATENÇÃO: Apagar todo o histórico?')) setTransactions([]);
+    if (confirm('ATENÇÃO: Deseja apagar todo o histórico?')) setTransactions([]);
   };
 
   const exportData = () => {
@@ -151,7 +77,6 @@ const App = () => {
 
   return (
     <div className="min-h-screen pb-24 md:pb-8 bg-neutral-950 text-neutral-50 selection:bg-emerald-500 selection:text-white">
-      {/* Toast */}
       {showToast && (
         <div className="fixed top-6 right-6 z-[60] animate-fade-in bg-neutral-900 border border-emerald-500/20 shadow-xl p-4 rounded-xl flex items-center gap-3 text-emerald-400">
           <CheckCircle2 size={20} />
@@ -193,15 +118,14 @@ const App = () => {
             </div>
         )}
 
-        {/* TRANSAÇÕES (Com Filtros e Backup) */}
+        {/* TRANSAÇÕES */}
         {activeTab === 'transactions' && (
             <div className="animate-fade-in grid grid-cols-1 lg:grid-cols-4 gap-8">
                 <div className="lg:col-span-4">
                     <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-2xl font-bold text-white">Extrato Completo</h2>
+                      <h2 className="text-2xl font-bold text-white">Extrato</h2>
                       <button onClick={() => setIsModalOpen(true)} className="md:hidden text-emerald-500 font-bold text-sm">Nova Transação</button>
                     </div>
-                    {/* Lista Atualizada */}
                     <TransactionList 
                         transactions={transactions} 
                         onDelete={deleteTransaction}
@@ -212,7 +136,7 @@ const App = () => {
             </div>
         )}
 
-        {/* PLANEJAMENTO (Recuperado) */}
+        {/* PLANEJAMENTO - Agora usando os arquivos reais! */}
         {activeTab === 'planning' && (
             <div className="animate-fade-in grid grid-cols-1 md:grid-cols-2 gap-8">
                  <BudgetManager transactions={transactions} budgets={budgets} onUpdateBudget={updateBudget} />
@@ -224,7 +148,7 @@ const App = () => {
 
       <TransactionForm isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAddTransaction={(t) => addTransaction(t.description, t.amount, t.type, t.category, t.date)} />
 
-      {/* Menu Celular */}
+      {/* Mobile Nav */}
       <div className="fixed bottom-0 left-0 right-0 bg-neutral-900 border-t border-neutral-800 p-2 md:hidden z-40 flex justify-around items-center pb-safe">
         <button onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center gap-1 p-2 rounded-xl w-20 transition-all ${activeTab === 'dashboard' ? 'text-emerald-500' : 'text-neutral-500'}`}><PieChart size={24} strokeWidth={activeTab === 'dashboard' ? 2.5 : 2} /><span className="text-[10px] font-medium">Resumo</span></button>
         <div className="relative -top-5"><button onClick={() => setIsModalOpen(true)} className="flex items-center justify-center w-14 h-14 bg-emerald-500 rounded-full text-white shadow-lg shadow-emerald-500/40 active:scale-90 transition-transform"><Plus size={28} /></button></div>
