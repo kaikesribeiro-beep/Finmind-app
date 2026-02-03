@@ -9,14 +9,12 @@ export interface Transaction {
   date: string;
 }
 
-// --- AQUI ESTÁ A MUDANÇA IMPORTANTE ---
-// Adicionamos 'spent' (gasto) para o Planejamento funcionar
+// AQUI ESTAVA O ERRO: Adicionamos 'spent' para parar de quebrar
 export interface Budget {
   category: string;
   limit: number;
-  spent: number;
+  spent?: number; 
 }
-// ---------------------------------------
 
 export type HealthStatus = 'POSITIVE' | 'NEUTRAL' | 'RISK';
 
@@ -42,14 +40,6 @@ export interface CategoryTotal {
 }
 
 export const CATEGORIES = [
-  'Renda',
-  'Comida',
-  'Transporte',
-  'Despesa', // Geral
-  'Outros',
-  'Moradia',
-  'Lazer',
-  'Saúde',
-  'Educação',
-  'Investimentos',
+  'Renda', 'Comida', 'Transporte', 'Despesa', 'Outros',
+  'Moradia', 'Lazer', 'Saúde', 'Educação', 'Investimentos'
 ];
