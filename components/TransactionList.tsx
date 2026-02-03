@@ -5,7 +5,7 @@ import { TrendingUp, TrendingDown, Filter, Download, Trash2, Calendar } from 'lu
 interface TransactionListProps {
   transactions: Transaction[];
   onDelete: (id: string) => void;
-  // Adicionamos essas duas linhas para aceitar as novas funções
+  // Esses dois itens com '?' são essenciais para os novos botões funcionarem
   onClearAll?: () => void;
   onExport?: () => void;
 }
@@ -17,7 +17,6 @@ export const TransactionList: React.FC<TransactionListProps> = ({ transactions, 
   const currentMonth = new Date().toISOString().slice(0, 7);
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
-  // Filtra por TIPO e por MÊS
   const filteredTransactions = transactions.filter(t => {
     const matchesType = filterType === 'all' ? true : t.type === filterType;
     const matchesMonth = t.date.startsWith(selectedMonth);
@@ -27,7 +26,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({ transactions, 
   return (
     <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl overflow-hidden shadow-sm mt-4">
       
-      {/* 1. Cabeçalho (Título + Botões Gerais) */}
+      {/* 1. Cabeçalho */}
       <div className="p-4 border-b border-neutral-800 flex items-center justify-between bg-neutral-900/80">
         <h2 className="text-sm font-semibold text-neutral-300 flex items-center gap-2">
           <Filter size={16} className="text-emerald-500" />
@@ -35,40 +34,27 @@ export const TransactionList: React.FC<TransactionListProps> = ({ transactions, 
         </h2>
         
         <div className="flex gap-2">
-          {/* Botão Baixar Backup */}
+          {/* Botão de Exportar (Backup) */}
           {onExport && (
-            <button 
-              onClick={onExport}
-              className="text-neutral-400 hover:text-emerald-400 p-1.5 hover:bg-emerald-500/10 rounded-lg transition-colors"
-              title="Baixar Backup"
-            >
+            <button onClick={onExport} className="text-neutral-400 hover:text-emerald-400 p-1.5 hover:bg-emerald-500/10 rounded-lg transition-colors" title="Baixar Backup">
               <Download size={16} />
             </button>
           )}
           
-          {/* Botão Limpar Tudo (Lixeira Geral) */}
+          {/* Botão de Limpar Tudo */}
           {transactions.length > 0 && onClearAll && (
-            <button 
-              onClick={onClearAll}
-              className="text-neutral-400 hover:text-red-400 p-1.5 hover:bg-red-500/10 rounded-lg transition-colors"
-              title="Apagar Tudo"
-            >
+            <button onClick={onClearAll} className="text-neutral-400 hover:text-red-400 p-1.5 hover:bg-red-500/10 rounded-lg transition-colors" title="Apagar Tudo">
               <Trash2 size={16} />
             </button>
           )}
         </div>
       </div>
 
-      {/* 2. Área de Filtros (Calendário + Abas) */}
+      {/* 2. Filtros */}
       <div className="p-2 space-y-2 border-b border-neutral-800/50">
         <div className="flex items-center gap-2 bg-neutral-950 p-2 rounded-lg border border-neutral-800">
             <Calendar size={14} className="text-neutral-500" />
-            <input 
-                type="month" 
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-                className="bg-transparent text-sm text-neutral-300 outline-none w-full"
-            />
+            <input type="month" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="bg-transparent text-sm text-neutral-300 outline-none w-full"/>
         </div>
 
         <div className="flex gap-2">
@@ -78,12 +64,10 @@ export const TransactionList: React.FC<TransactionListProps> = ({ transactions, 
         </div>
       </div>
 
-      {/* 3. Lista de Transações */}
+      {/* 3. Lista */}
       <div className="max-h-[400px] overflow-y-auto custom-scrollbar p-2 space-y-2">
         {filteredTransactions.length === 0 ? (
-          <div className="text-center py-8 text-neutral-600">
-            <p className="text-xs">Nada encontrado neste mês.</p>
-          </div>
+          <div className="text-center py-8 text-neutral-600"><p className="text-xs">Nada encontrado neste mês.</p></div>
         ) : (
           filteredTransactions.map((transaction) => (
             <div key={transaction.id} className="group flex items-center justify-between p-3 rounded-xl bg-neutral-900/40 hover:bg-neutral-800/60 border border-transparent hover:border-neutral-700 transition-all">
