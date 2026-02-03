@@ -5,11 +5,11 @@ import { TransactionForm } from './components/TransactionForm';
 import { FinancialCharts } from './components/FinancialCharts';
 import { TransactionList } from './components/TransactionList';
 import { AIAnalyst } from './components/AIAnalyst';
-// Importando os componentes que você JÁ TEM na pasta components
+// IMPORTANTE: Aqui estamos a usar os SEUS componentes originais
 import { BudgetManager } from './components/BudgetManager';
 import { SimulationPanel } from './components/SimulationPanel';
 import { Transaction, TransactionType, Budget } from './types';
-import { LayoutDashboard, Receipt, PieChart, Plus, CheckCircle2, Wallet } from 'lucide-react';
+import { LayoutDashboard, Receipt, PieChart, Plus, CheckCircle2 } from 'lucide-react';
 import './index.css';
 
 const App = () => {
@@ -17,17 +17,15 @@ const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
-  // Carrega Transações
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
     const saved = localStorage.getItem('finmindTransactions');
     if (saved) return JSON.parse(saved);
     return [
       {id: '1', description: 'Salário', amount: 2000, type: 'income', category: 'Renda', date: '2026-02-01'},
-      {id: '2', description: 'Almoço', amount: 45, type: 'expense', category: 'Alimentação', date: '2026-02-03'}
+      {id: '2', description: 'Almoço', amount: 45, type: 'expense', category: 'Comida', date: '2026-02-03'}
     ];
   });
 
-  // Carrega Orçamentos
   const [budgets, setBudgets] = useState<Budget[]>(() => {
     const saved = localStorage.getItem('finmind_budgets');
     return saved ? JSON.parse(saved) : [];
@@ -53,14 +51,7 @@ const App = () => {
     setTransactions((prev) => prev.filter(t => t.id !== id));
   };
 
-  const updateBudget = (newBudget: Budget) => {
-    setBudgets(prev => {
-      const filtered = prev.filter(b => b.category !== newBudget.category);
-      return [...filtered, newBudget];
-    });
-  };
-
-  // Funções de Limpeza e Exportação
+  // Funções novas que você pediu (Limpar e Exportar)
   const clearAllTransactions = () => {
     if (confirm('ATENÇÃO: Deseja apagar todo o histórico?')) setTransactions([]);
   };
@@ -73,6 +64,13 @@ const App = () => {
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
+  };
+
+  const updateBudget = (newBudget: Budget) => {
+    setBudgets(prev => {
+      const filtered = prev.filter(b => b.category !== newBudget.category);
+      return [...filtered, newBudget];
+    });
   };
 
   return (
@@ -126,6 +124,7 @@ const App = () => {
                       <h2 className="text-2xl font-bold text-white">Extrato</h2>
                       <button onClick={() => setIsModalOpen(true)} className="md:hidden text-emerald-500 font-bold text-sm">Nova Transação</button>
                     </div>
+                    {/* Lista com as suas novas funções */}
                     <TransactionList 
                         transactions={transactions} 
                         onDelete={deleteTransaction}
@@ -136,7 +135,7 @@ const App = () => {
             </div>
         )}
 
-        {/* PLANEJAMENTO - Agora usando os arquivos reais! */}
+        {/* PLANEJAMENTO - Usando os seus ficheiros reais! */}
         {activeTab === 'planning' && (
             <div className="animate-fade-in grid grid-cols-1 md:grid-cols-2 gap-8">
                  <BudgetManager transactions={transactions} budgets={budgets} onUpdateBudget={updateBudget} />
