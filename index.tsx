@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import { SummaryCards } from './components/SummaryCards';
-import { TransactionForm } from './components/TransactionForm';
-import { FinancialCharts } from './components/FinancialCharts';
-import { TransactionList } from './components/TransactionList';
-import { AIAnalyst } from './components/AIAnalyst';
-import { BudgetManager } from './components/BudgetManager';
-import { SimulationPanel } from './components/SimulationPanel';
+import { SummaryCards } from './components/SummaryCards.tsx';
+import { TransactionForm } from './components/TransactionForm.tsx';
+import { FinancialCharts } from './components/FinancialCharts.tsx';
+import { TransactionList } from './components/TransactionList.tsx';
+import { AIAnalyst } from './components/AIAnalyst.tsx';
+import { BudgetManager } from './components/BudgetManager.tsx';
+import { SimulationPanel } from './components/SimulationPanel.tsx';
 import { Transaction, Budget } from './types';
 import { LayoutDashboard, Receipt, PieChart, Plus, CheckCircle2, Download } from 'lucide-react';
 
