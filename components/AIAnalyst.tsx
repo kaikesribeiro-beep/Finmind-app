@@ -13,11 +13,21 @@ export const AIAnalyst: React.FC<AIAnalystProps> = ({ transactions, onOpenModal 
   const [loading, setLoading] = useState(false);
 
   const handleAnalyze = async () => {
+  try {
     setLoading(true);
+
     const result = await analyzeFinances(transactions);
-    setAnalysis(result);
+
+    console.log("Resposta da IA:", result);
+    alert(result); // 👈 só para confirmar que a IA funciona
+    
+  } catch (error) {
+    console.error(error);
+    alert("Erro ao chamar a IA");
+  } finally {
     setLoading(false);
-  };
+  }
+};
 
   const getHealthStyles = (status: HealthStatus) => {
     switch (status) {
