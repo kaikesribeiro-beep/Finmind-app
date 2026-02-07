@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export default async function handler(req: any, res: any) {
+  console.log("🔥 API GEMINI CHAMADA");
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
