@@ -4,12 +4,8 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!,
 });
 
-export default async function handler(req: Request) {
+export async function POST(req: Request) {
   try {
-    if (req.method !== "POST") {
-      return new Response("Method Not Allowed", { status: 405 });
-    }
-
     const body = await req.json();
 
     if (!body.transactions || !Array.isArray(body.transactions)) {
@@ -20,8 +16,9 @@ export default async function handler(req: Request) {
     }
 
     const prompt = `
-Analise as seguintes transações financeiras e gere insights claros e objetivos,
-incluindo dicas de economia e possíveis problemas financeiros.
+Você é um analista financeiro.
+Analise as seguintes transações e gere insights claros e objetivos,
+com dicas de economia e alertas financeiros.
 
 Transações:
 ${JSON.stringify(body.transactions, null, 2)}
@@ -38,11 +35,14 @@ ${JSON.stringify(body.transactions, null, 2)}
     });
 
     return new Response(
-      JSON.stringify({ result: response.text }),
+      JSON.stringify({
+        result: response.text,
+      }),
       { status: 200 }
     );
   } catch (error) {
     console.error("Erro Gemini:", error);
+
     return new Response(
       JSON.stringify({ error: "Erro ao chamar Gemini" }),
       { status: 500 }
