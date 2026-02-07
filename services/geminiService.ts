@@ -1,27 +1,18 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+const genAI = new GoogleGenerativeAI(apiKey);
+
 export async function analyzeFinances(transactions: any[]) {
-  if (!transactions || transactions.length === 0) {
-    throw new Error("Nenhuma transação para analisar");
-  }
-
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-
-  if (!apiKey) {
-    throw new Error("Chave Gemini não encontrada");
-  }
-
-  const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const prompt = `
-Você é um analista financeiro.
-Analise as transações abaixo e gere insights claros, alertas e dicas práticas.
-
-Transações:
-${JSON.stringify(transactions, null, 2)}
+Analise as seguintes transações financeiras e gere insights:
+${JSON.stringify(transactions)}
 `;
 
   const result = await model.generateContent(prompt);
-  return result.response.text();
+  const response = await result.response;
+  return response.text();
 }
