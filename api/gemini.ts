@@ -25,10 +25,19 @@ export async function POST(req: Request) {
       ],
     });
 
+    // ✅ FORMA SEGURA DE PEGAR O TEXTO
+    const text =
+      response?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!text) {
+      return new Response(
+        JSON.stringify({ error: "Resposta vazia do Gemini" }),
+        { status: 500 }
+      );
+    }
+
     return new Response(
-      JSON.stringify({
-        result: response.text,
-      }),
+      JSON.stringify({ result: text }),
       { status: 200 }
     );
   } catch (error) {
