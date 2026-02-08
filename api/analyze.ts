@@ -1,57 +1,57 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { useState } from "react";
 
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
-  // Aceita apenas POST
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+type Transaction = {
+  description: string;
+  amount: number;
+  type: "income" | "expense";
+};
 
-  try {
-    const { transactions } = req.body;
+export default function AIAnalyst({
+  transactions,
+}: {
+  transactions: Transaction[];
+}) {
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState("");
 
-    if (!transactions) {
-      return res.status(400).json({ error: "Transactions not provided" });
+  const analyze = async () => {
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ transactions }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro na resposta da API");
+      }
+
+      const data = await response.json();
+      setResult(data.text);
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao chamar a IA");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    if (!process.env.GEMINI_API_KEY) {
-      throw new Error("GEMINI_API_KEY não definida nas variáveis de ambiente");
-    }
+  return (
+    <div>
+      <button onClick={analyze} disabled={loading}>
+        {loading ? "Analisando..." : "Analisar Agora"}
+      </button>
 
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-    });
-
-    const prompt = `
-Você é um analista financeiro experiente.
-
-Analise as transações abaixo, identifique:
-- padrões de gastos
-- possíveis excessos
-- oportunidades de economia
-- um resumo final claro
-
-Transações:
-${JSON.stringify(transactions, null, 2)}
-`;
-
-    const result = await model.generateContent(prompt);
-
-    return res.status(200).json({
-      text: result.response.text(),
-    });
-
-  } catch (error: any) {
-    console.error("Erro na API /api/analyze:", error);
-
-    return res.status(500).json({
-      error: "Erro ao gerar análise",
-      details: error.message,
-    });
-  }
+      {result && (
+        <div style={{ marginTop: 16 }}>
+          <h3>Resultado da Análise</h3>
+          <p>{result}</p>
+        </div>
+      )}
+    </div>
+  );
 }
