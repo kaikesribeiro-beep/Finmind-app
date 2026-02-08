@@ -12,9 +12,9 @@ export default function AIAnalyst({
   transactions: Transaction[];
 }) {
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState("");
+  const [result, setResult] = useState<string>("");
 
-  const analyze = async () => {
+  const analyze = async (): Promise<void> => {
     setLoading(true);
 
     try {
