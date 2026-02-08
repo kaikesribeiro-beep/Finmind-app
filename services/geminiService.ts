@@ -1,28 +1,15 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-
-if (!apiKey) {
-  throw new Error("VITE_GEMINI_API_KEY não definida");
-}
-
-const genAI = new GoogleGenerativeAI(apiKey);
-
 export async function analyzeFinances(transactions: any[]) {
-  const model = genAI.getGenerativeModel({
-    model: "gemini-1.0-pro"
+  const response = await fetch("/api/analyze", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ transactions }),
   });
 
-  const prompt = `
-Analise as seguintes transações financeiras e gere insights claros.
-Responda em português.
+  if (!response.ok) {
+    throw new Error("Erro ao chamar a IA");
+  }
 
-Transações:
-${JSON.stringify(transactions, null, 2)}
-`;
-
-  const result = await model.generateContent(prompt);
-  const response = result.response;
-
-  return response.text();
+  return response.json();
 }
