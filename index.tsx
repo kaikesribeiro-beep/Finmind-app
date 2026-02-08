@@ -4,7 +4,7 @@ import { SummaryCards } from './components/SummaryCards.tsx';
 import { TransactionForm } from './components/TransactionForm.tsx';
 import { FinancialCharts } from './components/FinancialCharts.tsx';
 import { TransactionList } from './components/TransactionList.tsx';
-import { AIAnalyst } from './components/AIAnalyst.tsx';
+import AIAnalyst from './components/AIAnalyst.tsx';
 import { BudgetManager } from './components/BudgetManager.tsx';
 import { SimulationPanel } from './components/SimulationPanel.tsx';
 import { Transaction, Budget } from './types';
