@@ -33,8 +33,11 @@ ${JSON.stringify(transactions, null, 2)}
     const text = result.response.text();
 
     return res.status(200).json({ result: text });
-  } catch (error) {
-    console.error("Erro Gemini:", error);
-    return res.status(500).json({ error: "Erro ao chamar Gemini" });
-  }
+  } catch (error: any) {
+  console.error("ERRO COMPLETO:", error);
+  return res.status(500).json({
+    error: "Erro ao chamar Gemini",
+    details: error?.message || error,
+  });
 }
+  
