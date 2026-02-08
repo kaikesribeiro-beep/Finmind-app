@@ -1,15 +1,21 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+/**
+ * Força a Vercel a usar Node.js (necessário para o SDK do Gemini)
+ */
+export const config = {
+  runtime: "nodejs",
+};
 
-export default async function handler(req: Request) {
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
+
+export default async function handler(req: Request): Promise<Response> {
   if (req.method !== "POST") {
     return new Response("Method Not Allowed", { status: 405 });
   }
 
   try {
-    const body = await req.json();
-    const { transactions } = body;
+    const { transactions } = await req.json();
 
     if (!transactions || !Array.isArray(transactions)) {
       return new Response(
@@ -23,19 +29,32 @@ export default async function handler(req: Request) {
     });
 
     const prompt = `
-Analise as seguintes transações financeiras e gere insights claros e objetivos:
+Você é um analista financeiro.
+
+Analise as transações abaixo e gere:
+- insights claros
+- riscos financeiros
+- oportunidades de economia
+- sugestões práticas
+
+Transações:
 ${JSON.stringify(transactions, null, 2)}
 `;
 
     const result = await model.generateContent(prompt);
+
     const text = result.response.text();
 
-    return new Response(JSON.stringify({ text }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ text }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   } catch (error) {
     console.error("Erro na API:", error);
+
     return new Response(
       JSON.stringify({ error: "Erro ao processar a análise" }),
       { status: 500 }
