@@ -1,27 +1,21 @@
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-
-/**
- * Força a Vercel a usar Node.js (necessário para o SDK do Gemini)
- */
-export const config = {
-  runtime: "nodejs",
-};
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
 
-export default async function handler(req: Request): Promise<Response> {
+export default async function handler(
+  req: VercelRequest,
+  res: VercelResponse
+) {
   if (req.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
+    return res.status(405).json({ error: "Method Not Allowed" });
   }
 
   try {
-    const { transactions } = await req.json();
+    const { transactions } = req.body;
 
     if (!transactions || !Array.isArray(transactions)) {
-      return new Response(
-        JSON.stringify({ error: "Transactions inválidas" }),
-        { status: 400 }
-      );
+      return res.status(400).json({ error: "Transactions inválidas" });
     }
 
     const model = genAI.getGenerativeModel({
@@ -29,35 +23,18 @@ export default async function handler(req: Request): Promise<Response> {
     });
 
     const prompt = `
-Você é um analista financeiro.
-
-Analise as transações abaixo e gere:
-- insights claros
-- riscos financeiros
-- oportunidades de economia
-- sugestões práticas
-
-Transações:
+Analise as seguintes transações financeiras e gere insights claros e objetivos:
 ${JSON.stringify(transactions, null, 2)}
 `;
 
     const result = await model.generateContent(prompt);
-
     const text = result.response.text();
 
-    return new Response(
-      JSON.stringify({ text }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return res.status(200).json({ text });
   } catch (error) {
     console.error("Erro na API:", error);
-
-    return new Response(
-      JSON.stringify({ error: "Erro ao processar a análise" }),
-      { status: 500 }
-    );
+    return res.status(500).json({
+      error: "Erro ao processar a análise",
+    });
   }
 }
