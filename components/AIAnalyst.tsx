@@ -12,17 +12,16 @@ export default function AIAnalyst({
   transactions: Transaction[];
 }) {
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState("");
+  const [result, setResult] = useState<string | null>(null);
 
   const analyze = async () => {
     setLoading(true);
+    setResult(null);
 
     try {
       const response = await fetch("/api/analyze", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transactions }),
       });
 
@@ -34,22 +33,31 @@ export default function AIAnalyst({
       setResult(data.text);
     } catch (error) {
       console.error(error);
-      alert("Erro ao chamar a IA");
+      setResult("Erro ao gerar análise.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div>
+    <div style={{ marginTop: 24 }}>
       <button onClick={analyze} disabled={loading}>
         {loading ? "Analisando..." : "Analisar Agora"}
       </button>
 
+      {/* RESULTADO */}
       {result && (
-        <div style={{ marginTop: 16 }}>
+        <div
+          style={{
+            marginTop: 16,
+            padding: 16,
+            borderRadius: 8,
+            background: "#111",
+            color: "#fff",
+          }}
+        >
           <h3>Resultado da Análise</h3>
-          <p>{result}</p>
+          <p style={{ whiteSpace: "pre-wrap" }}>{result}</p>
         </div>
       )}
     </div>
